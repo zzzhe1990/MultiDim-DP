@@ -7,6 +7,49 @@ using namespace std;
 int n,m;	//n=number of items,m=number of weights
 int num_constraint, num_item;
 
+void displayInputArray(int *profit, int *weight, int *cap, int n, int m){
+	for (int i=0; i<n; i++)
+		cout << profit[i] << " ";
+	cout << endl;
+	for (int i=0; i<m; i++){
+		for (int j=0; j<n; j++){
+			cout << weight[j*m+i] << " ";
+		}
+		cout << endl;
+	}
+	for (int i=0; i<m; i++)
+		cout << cap[i] << " ";
+	cout << endl;
+}
+
+void readInputData(int *profit, int *weight, int *cap, string str1){
+	
+	ifstream inputfile;
+
+	inputfile.open(str1.c_str());
+
+	if (!inputfile){
+		cout <<"ERROR: Input file cannot be opened!" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	int trash;
+	inputfile >> trash >> trash >> trash;
+
+	for (int i=0; i<n; i++)	
+		inputfile >> profit[i];
+
+	for (int i=0; i<m; i++){
+		for (int j=0; j<n; j++){
+			inputfile >> weight[j*m+i];
+		}
+		//inputfile >> profit[i];
+	}
+	
+	for (int i=0; i<m; i++)
+		inputfile >> cap[i];	
+}
+
 bool ifAleqB(int *d, int *cap, int len){
 	int t=0;
 	for (int i=0; i<len; i++){
@@ -61,7 +104,7 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 	int *lowB = new int[m];
 
 	//how many MKP vector can be obtained in total?
-	int *mkp = new int[n*totalweight];
+	int *mkp = new int[n*total_weight];
 
 	//initialize the vector maxw[] which is the addition of all the items' weight vectors
 	for (int i=0; i<n; i++){
@@ -81,7 +124,7 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 
 	
 	for (int k=0; k<n; k++){
-		mkpIdx = k*totalweight;
+		int mkpIdx = k*total_weight;
 
 		bool startfromzero = false;
 		for (int j=0; j<m; j++){
@@ -110,7 +153,7 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 			
 			if ( ifAleqB(d, &weight[k*m], m) ){
 				//T_(k)(d) = T_(k-1)(d)
-				mkp[idx_k_d] = mkp[idx_k_d-totalweight];
+				mkp[idx_k_d] = mkp[idx_k_d-total_weight];
 			}
 			else{
 				//T_(k)(d) = max(T_(k-1)(d), T_(k-1)(d-w_k)+p_k);
@@ -119,19 +162,19 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 					d_w[i] = d[i] - weight[k*m+i];
 				}
 				int idx_dw = mkpToIndex(cap, d_w, m);
-				mkp[idx_k_d] = max( mkp[idx_k_d-totalweight], mkp[mkpIdx - totalweight + idx_dw]+ profit[k]);
+				mkp[idx_k_d] = max( mkp[idx_k_d-total_weight], mkp[mkpIdx - total_weight + idx_dw]+ profit[k]);
 			}
 			//update vector d
 		}
 			
 	}
 
-	int maxvalue = mkp[n*totalweight-1];
+	int maxvalue = mkp[n*total_weight-1];
 
 	delete[] maxw;
 	delete[] d;
 	delete[] d_w;
-	delete[] lowb;
+	delete[] lowB;
 	delete[] mkp;
 
 	return maxvalue;
@@ -139,7 +182,7 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 
 
 int main(int argc, char *argv[]){
-	string str1 = "./Data/UniformData/item";
+	string str1 = "./Data/Sample_BergerPaper/mkp_";
 	string str2 = ".txt";
 	string str3 = ".xls";
 
@@ -148,8 +191,8 @@ int main(int argc, char *argv[]){
 		exit(0);
 	}
 	else{
-		num_item = atoi();
-		num_constraint = atoi();
+		num_item = atoi(argv[1]);
+		num_constraint = atoi(argv[2]);
 	}
 	
 	ostringstream convert1, convert2;
@@ -159,23 +202,16 @@ int main(int argc, char *argv[]){
 	str1.append("_constraints");
 	str1.append( convert2.str() );	
 	
-	ifstream inputfile;
-
-	inputfile.open(str1.c_str());
-
-	if (!inputfile){
-		cout <<"ERROR: Input file cannot be opened!" << endl;
-		exit(EXIT_FAILURE);
-	}
+	str1.assign("./Data/Sample_BergerPaper/mkp_2_1_600_20_3000_0.txt");	
 	
-	//input file format: first line -- # of item; second line -- constraints cap; rest -- item weights + item profit
+	//input file format: same as the paper author's format (Berger's paper).
 	//inputfile >> num_item;
 
 	int *weight, *profit, *cap;
 	int *OPT;
 
 	//load m,n from the input configuration file.
-	m = num_constranit;
+	m = num_constraint;
 	n = num_item;
 
 
@@ -184,15 +220,9 @@ int main(int argc, char *argv[]){
 	weight = new int[n*m];
 
 	//load array weight, profit, cap from the configuration file.
-	for (int i=0; i<m; i++)	
-		inputfile >> cap[i];
+	readInputData(profit, weight, cap, str1);
 
-	for (int i=0; i<n; i++){
-		for (int j=0; j<m; j++){
-			inputfile >> weight[i*m+j];
-		}
-		inputfile >> profit[i];
-	}
+	displayInputArray(profit, weight, cap, n, m);
 
 	int total_weight = 1;
 	for (int i=0; i<m; i++)
@@ -202,7 +232,7 @@ int main(int argc, char *argv[]){
 
 	int maxprofit = DPiteration(m, n, total_weight, weight, profit, cap, OPT);
 
-
+	cout << "Maximum profit: " << maxprofit << endl;
 
 	//free arrays
 	delete[] weight;
