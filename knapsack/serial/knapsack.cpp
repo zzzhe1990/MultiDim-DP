@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cstdlib>
 using namespace std;
 
 int n,m;	//n=number of items,m=number of weights
@@ -51,15 +52,14 @@ void readInputData(int *profit, int *weight, int *cap, string str1){
 }
 
 bool ifAleqB(int *d, int *cap, int len){
-	int t=0;
+	
 	for (int i=0; i<len; i++){
-		t += (cap[i] - d[i]);
+		if (cap[i] < d[i]){
+			return false;
+		}
 	}
 	
-	if (t >= 0)
-		return true;
-	else
-		return false;
+	return true;
 }
 
 
@@ -166,7 +166,7 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 			}
 			//update vector d
 		}
-			
+		cout << "item: " << k << ", mkpIdx: " << mkpIdx << ", lowBIdx: " << lowBIdx << ", maxIdx: " << maxIdx << ", totalweight: " << total_weight << endl;			
 	}
 
 	int maxvalue = mkp[n*total_weight-1];
