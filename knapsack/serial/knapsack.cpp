@@ -63,11 +63,11 @@ bool ifAleqB(int *d, int *cap, int len){
 }
 
 
-void indexToMKP(int *mkp, int *cap, int m, int index){	
+void indexToMKP(int *d, int *cap, int m, int index){	
 	int residual = index;
 	for (int i = 0; i < m; i++)
 	{
-		mkp[i] = 0;
+		d[i] = 0;
 		int div = 1;
 		if (cap[i] != 0){				
 			for (int j=i+1; j<m; j++){
@@ -75,13 +75,13 @@ void indexToMKP(int *mkp, int *cap, int m, int index){
 					div *= (cap[j] + 1);
 				}
 			}
-			mkp[i] = residual / div;
-			residual -= (div * mkp[i]);
+			d[i] = residual / div;
+			residual -= (div * d[i]);
 		}
 	}
 }
 
-int mkpToIndex(int *cap, int *mkp, int m){
+int mkpToIndex(int *cap, int *d, int m){
 	int index = 0;
 	for (int i=0; i<m; i++){
 		int resid = 1;
@@ -89,42 +89,49 @@ int mkpToIndex(int *cap, int *mkp, int m){
 		for (int j=i+1; j<m; j++){
 			resid *= (cap[j]+1);	
 		}
-		index += (mkp[i] * resid);
+		index += (d[i] * resid);
 	}
 	return index;
 }
 
 
-int DPiteration(int m, int n, int total_weight, int *weight, 
-		 int *profit, int *cap, int *OPT){
+int DPiteration(int m, int n, int *weight, int *profit, int *cap){
 	
 	int *maxw = new int[m];
 	int *d = new int[m];
 	int *d_w = new int[m];
 	int *lowB = new int[m];
-
-	//how many MKP vector can be obtained in total?
-	int *mkp = new int[n*total_weight];
+	  
+	//MKP is a table consist of all constraints and items. Constraints includes no-constraint; item includes 0 item.
+	int total_weight = 1;
+	for (int i=0; i<m; i++)
+		total_weight *= (cap[i]+1);
+	int *mkp = new int[(n+1) * total_weight];
+	cout << "mkp pointer is declared" << endl;	
 
 	//initialize the vector maxw[] which is the addition of all the items' weight vectors
-	for (int i=0; i<n; i++){
-		for (int j=0; j<m; j++){
-			maxw[i*m+j] += weight[i*m+j];
-		}
-	}
-
-	//initialize OPT for empty knapsack(0 item) and maximum weight for each constraint
 	for (int i=0; i<m; i++){
-		int offset = 0;
-		for (int j=0; j<cap[i]; j++){
-			OPT[offset+j] = 0;
+		for (int j=0; j<n; j++){
+			maxw[i] += weight[j*m+i];
 		}
-		offset+=cap[i];
 	}
+	cout << "max weight, dim 1: " << maxw[0] << ", dim 2: " << maxw[1] << endl;
 
+	//initialize MKP for empty knapsack(0 item) and 0 weight for each item 
+	int range = 1;
+	for (int i=0; i<m; i++){
+		range *= (cap[i] + 1);
+	}
+	for (int i=0; i<range; i++){
+		mkp[i] = 0;
+	}
+	for (int i=0; i<n; i++)
+		mkp[i*range] = 0;
+	
+	cout << "0 are initialized to MKP table." << endl;
 	
 	for (int k=0; k<n; k++){
-		int mkpIdx = k*total_weight;
+		int mkpIdx = (k+1) * total_weight;	//MKP for 0 item is also stored, need to be skipped.
 
 		bool startfromzero = false;
 		for (int j=0; j<m; j++){
@@ -146,8 +153,7 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 		//The MKP vectors that are between lowB and cap are the vectors that their indecies of each constraint dimension are between lowB[] and cap[]
 		//while ( ifAleqB(d, cap, m) ){
 		int lowBIdx = mkpToIndex(cap, lowB, m);
-		int maxIdx = mkpToIndex(cap, cap, m);	//maxIdx maybe equal to totalweight
- 	 	for (int index = lowBIdx; index <= maxIdx; index++){
+ 	 	for (int index = lowBIdx; index <= total_weight; index++){
 			indexToMKP(d, cap, m, index);
 			int idx_k_d = mkpIdx + index;
 			
@@ -166,10 +172,10 @@ int DPiteration(int m, int n, int total_weight, int *weight,
 			}
 			//update vector d
 		}
-		cout << "item: " << k << ", mkpIdx: " << mkpIdx << ", lowBIdx: " << lowBIdx << ", maxIdx: " << maxIdx << ", totalweight: " << total_weight << endl;			
+		cout << "item: " << k << ", mkpIdx: " << mkpIdx << ", lowBIdx: " << lowBIdx << ", totalweight: " << total_weight << endl;			
 	}
 
-	int maxvalue = mkp[n*total_weight-1];
+	int maxvalue = mkp[ (n+1) * total_weight - 1];
 
 	delete[] maxw;
 	delete[] d;
@@ -202,13 +208,12 @@ int main(int argc, char *argv[]){
 	str1.append("_constraints");
 	str1.append( convert2.str() );	
 	
-	str1.assign("./Data/Sample_BergerPaper/mkp_2_1_600_20_3000_0.txt");	
+	str1.assign("/wsu/home/et/et80/et8023/MulDimDP/knapsack/serial/Data/Sample_BergerPaper/mkp_2_1_600_20_3000_0.txt");	
 	
 	//input file format: same as the paper author's format (Berger's paper).
 	//inputfile >> num_item;
 
 	int *weight, *profit, *cap;
-	int *OPT;
 
 	//load m,n from the input configuration file.
 	m = num_constraint;
@@ -224,13 +229,7 @@ int main(int argc, char *argv[]){
 
 	displayInputArray(profit, weight, cap, n, m);
 
-	int total_weight = 1;
-	for (int i=0; i<m; i++)
-		total_weight *= (cap[i] + 1);
-
-	OPT = new int[n*total_weight];
-
-	int maxprofit = DPiteration(m, n, total_weight, weight, profit, cap, OPT);
+	int maxprofit = DPiteration(m, n, weight, profit, cap);
 
 	cout << "Maximum profit: " << maxprofit << endl;
 
@@ -238,7 +237,6 @@ int main(int argc, char *argv[]){
 	delete[] weight;
 	delete[] profit;
 	delete[] cap;
-	delete[] OPT;
 
 	return 0;
 }
