@@ -1,0 +1,25 @@
+*******************************************
+****  Work Log
+*******************************************
+
+Development Problems:
+	1. unsinged long long is used for the possible large number.
+	2. possible issue with memory allocation that no continues heap memory is available for the large array.
+	3. Reduce the number of if statements, division, modulus, and etc.
+
+
+Algorithm Problems:
+	1. Because of the dependency between the multiple partitioned blocks, some data calculated in the previous blocks need to be stored and passed to the later calculations.
+
+
+*******************************************************************************************************************************
+Mar 30  2018
+
+Done:
+	1. Serial implementation of knapsack is completed.
+	2. Direct GPU implementation is completed.
+
+To do:
+	1. Static functions for constraint number of 1, 2, 3, and 4 for both serial and GPU implementations.
+	2. Partitioning. Partition the constraints only, do not partition item. 
+	
