@@ -13,7 +13,7 @@ Algorithm Problems:
 
 
 *******************************************************************************************************************************
-Mar 30  2018
+Mar 29 2018
 
 Done:
 	1. Serial implementation of knapsack is completed.
@@ -22,4 +22,10 @@ Done:
 To do:
 	1. Static functions for constraint number of 1, 2, 3, and 4 for both serial and GPU implementations.
 	2. Partitioning. Partition the constraints only, do not partition item. 
-	
+
+
+*********************************************************************************************************************************
+Mar 30 2018
+
+Done:
+	1. static functions for GPU implementation is completed.	
