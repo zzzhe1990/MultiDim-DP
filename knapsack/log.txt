@@ -10,7 +10,19 @@ Development Problems:
 
 Algorithm Problems:
 	1. Because of the dependency between the multiple partitioned blocks, some data calculated in the previous blocks need to be stored and passed to the later calculations.
+	2. Partition requires extra memory space for storing the backup array. If the max item weight is large for each constraint and the number of constraint dimension is also large, 
+		the size of the backup array can exceed the memory limit.
+	3. The partition is limited because of the number of backup arrays required. The more dimensions we have, more arrays are required.
+	4. It is necessary to analyze the relation between (constraints, #item), (par-block-constraint-length, each-dim-cap), (par-block-length, backup array constrant length)
+!!!!!! 	5. Par is not feasible for reducing memory consumption for knapsack problem due to the capacity. Backup array requires more memory than the partitioned capacity because 
+		max_item_weight * #item >= capacity
+XXXXXX	6. The only possible benefit for partitioning knapsack problem is the if statement elimination. However, the cost of partitioning is unknown.
 
+
+Algorithm benefits:
+	1. Solve much larger problem. As long as the backup array can be stored, the knapsack problem is able to be solved on the GPU.
+XXXXX	2. The use of backup array may elimiate the if statement in the DP iteration. Preset the array to all 0, we can remove array2[i] = array1[i] when mkp table size[i] < weight[i], 
+		because the backup array can be used to calculate the array2[i] = max(array1[i] ,array1[i-offset]+profit) even if the mkp table idx is smaller than item weight.
 
 *******************************************************************************************************************************
 Mar 29 2018
@@ -28,4 +40,10 @@ To do:
 Mar 30 2018
 
 Done:
-	1. static functions for GPU implementation is completed.	
+	1. static functions for GPU implementation is completed.
+
+*******************************************************************************************************************************
+Apr 2 2018
+
+Conclusion:
+	1. There is nothing we can do for knapsack problem.	

@@ -121,9 +121,9 @@ int main(int argc, char *argv[]){
 	//str1.append( convert2.str() );
 	
 #ifndef debug	
-	str1.assign("/wsu/home/et/et80/et8023/MulDimDP/knapsack/GPU/Data/Sample_BergerPaper/mkp_2_3_600_50_7500_0.txt");	
+	str1.assign("/wsu/home/et/et80/et8023/MulDimDP/knapsack/serial/Data/Sample_BergerPaper/mkp_3_4_200_12_600_0.txt");	
 #else
-	str1.assign("/wsu/home/et/et80/et8023/MulDimDP/knapsack/GPU/Data/test.txt");
+	str1.assign("/wsu/home/et/et80/et8023/MulDimDP/knapsack/serial/Data/test.txt");
 #endif
 	//input file format: same as the paper author's format (Berger's paper).
 	//inputfile >> num_item;
